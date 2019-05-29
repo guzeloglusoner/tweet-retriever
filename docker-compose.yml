@@ -12,6 +12,8 @@ services:
       - "2181:2181"
   kafka:
     build: .
+    depends_on:
+      - zookeeper
     ports:
       - "9092"
     environment:
@@ -19,3 +21,27 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+  webserver:
+    build: './webserver'
+    image: web_server
+    container_name: web_server
+    ports: 
+      - "9090:9090"
+    depends_on:
+      - server
+    networks:
+      - application
+  consumer:
+    build: './consumer'
+    image: frontend
+    container_name: frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - webserver
+    networks:
+      - application
+
+networks:
+  application:
+    driver: bridge
